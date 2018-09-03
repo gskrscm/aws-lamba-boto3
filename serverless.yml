@@ -16,11 +16,12 @@ service: aws-python3
 provider:
   name: aws
   runtime: python3.6
-  region: ap-south-1
+  region: eu-west-1
   iamRoleStatements: 
     - Effect: Allow
       Action: 
         - "ec2:Describe*"
+        - "elasticloadbalancing:Describe*"
       Resource: ["*"]
 
 functions:
