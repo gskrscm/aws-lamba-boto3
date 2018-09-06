@@ -20,8 +20,12 @@ provider:
   iamRoleStatements: 
     - Effect: Allow
       Action: 
-        - "ec2:Describe*"
-        - "elasticloadbalancing:Describe*"
+        - "ec2:DescribeInstances"
+        - "ec2:DescribeTags"
+        - "ec2:CreateTags"
+        - "elasticloadbalancing:DescribeLoadBalancers"
+        - "elasticloadbalancing:RegisterInstancesWithLoadBalancer"
+        - "elasticloadbalancing:DeregisterInstancesFromLoadBalancer"
       Resource: ["*"]
 
 functions:
