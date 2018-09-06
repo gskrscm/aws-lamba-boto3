@@ -11,13 +11,24 @@ ELB_ID = "nexus-nonprod"
 def hello(event, context):
 
     # Get ec2 instance name from ELB
-    # res = get_elb_instances(ELB_ID)
-    # Check Health status 
-    # Remove from elb
-    # Add to elb
+    res1 = get_elb_instances(ELB_ID)
     
-    res = ec2_list()
-    return str(res)
+    # # Remove from elb
+    for instance_id in res1:
+        res2 = deregister_instance_elb(ELB_ID, instance_id)
+        res3 = create_tag(instance_id, "health_status", "false")
+    
+    res2 = ec2_list()
+    instance_id = False
+
+    for key, value in res2.items():
+        instance_id = key
+
+    if instance_id:
+        res4 = register_instance_elb(ELB_ID, instance_id)
+    
+    # Send email notification: 
+    return {"res1": str(res1), "res2" :  str(res2), "res3" : str(res3), "res4" : str(res4)}
 
 def deregister_instance_elb(elb_id, instance_id):
     response = elb_client.deregister_instances_from_load_balancer(
@@ -57,8 +68,10 @@ def ec2_list():
     response = ec2_client.describe_instances(
         Filters=[
             {
-                'Name':'tag-key', 
-                'Values': ['nexus']
+                'Name':'tag:tesco_application', 
+                'Values': ['nexus'], 
+                'Name' : 'tag:health_status',
+                'Values' : ['true']
             }
         ]
     )
@@ -74,3 +87,18 @@ def get_instance_tags(ecid):
     ec2instance = ec2_resource.Instance(ecid)
     tagl = ec2instance.tags
     return tagl
+
+def create_tag(resource_id, key, value):
+    response = ec2_client.create_tags(
+    DryRun=False,
+    Resources=[
+        resource_id,
+    ],
+    Tags=[
+        {
+            'Key': key,
+            'Value': value
+        },
+    ]
+    )
+    return response
